@@ -1,0 +1,70 @@
+services:
+  # Database for Clients Service
+  clients-db:
+    image: postgres:15
+    container_name: microcommerce-clients-db
+    environment:
+      POSTGRES_DB: clients_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - clients_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d clients_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database for Orders Service
+  orders-db:
+    image: postgres:15
+    container_name: microcommerce-orders-db
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - orders_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d orders_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database for Products Service
+  products-db:
+    image: postgres:15
+    container_name: microcommerce-products-db
+    environment:
+      POSTGRES_DB: products_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - products_data:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d products_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database Admin Tool
+  adminer:
+    image: adminer
+    container_name: microcommerce-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - clients-db
+      - products-db
+      - orders-db
+
+volumes:
+  clients_data:
+  products_data:
+  orders_data:
