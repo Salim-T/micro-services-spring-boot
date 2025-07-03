@@ -4,15 +4,15 @@ services:
     image: postgres:15
     container_name: microcommerce-clients-db
     environment:
-      POSTGRES_DB: clients_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${CLIENTS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - clients_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${CLIENTS_DB_PORT}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d clients_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${CLIENTS_DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,15 +22,15 @@ services:
     image: postgres:15
     container_name: microcommerce-orders-db
     environment:
-      POSTGRES_DB: orders_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${ORDERS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - orders_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "${ORDERS_DB_PORT}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d orders_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${ORDERS_DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -40,25 +40,69 @@ services:
     image: postgres:15
     container_name: microcommerce-products-db
     environment:
-      POSTGRES_DB: products_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${PRODUCTS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - products_data:/var/lib/postgresql/data
     ports:
-      - "5435:5432"
+      - "${PRODUCTS_DB_PORT}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d products_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${PRODUCTS_DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: microcommerce-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_PORT}
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "${ZOOKEEPER_PORT}:2181"
+
+  # Kafka Broker
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: microcommerce-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+
+  # Kafka UI for management
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: microcommerce-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "${KAFKA_UI_PORT}:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
 
   # Database Admin Tool
   adminer:
     image: adminer
     container_name: microcommerce-adminer
     ports:
-      - "8080:8080"
+      - "${ADMINER_PORT}:8080"
     depends_on:
       - clients-db
       - products-db
