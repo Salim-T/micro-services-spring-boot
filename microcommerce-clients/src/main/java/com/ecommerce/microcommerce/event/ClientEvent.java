@@ -1,4 +1,4 @@
-package main.java.com.ecommerce.microcommerce.event;
+package com.ecommerce.microcommerce.event;
 
 import java.time.LocalDateTime;
 

@@ -8,8 +8,9 @@ import org.springframework.stereotype.Service;
 import com.ecommerce.microcommerce.model.Client;
 import com.ecommerce.microcommerce.repository.ClientRepository;
 
-import main.java.com.ecommerce.microcommerce.event.ClientEvent;
-import main.java.com.ecommerce.microcommerce.service.ClientEventProducer;
+import com.ecommerce.microcommerce.event.ClientEvent;
+import com.ecommerce.microcommerce.service.ClientEventProducer;
+
 
 @Service
 public class ClientService {
@@ -31,13 +32,11 @@ public class ClientService {
     }
 
     public Client saveClient(Client client) {
-        boolean isNewClient = client.getId() == 0;
         Client savedClient = clientRepository.save(client);
         
-        // Create and publish event
-        String eventType = isNewClient ? "CREATED" : "UPDATED";
-        ClientEvent clientEvent = new ClientEvent(
-            eventType,
+        // Publish Kafka event
+        ClientEvent event = new ClientEvent(
+            "CLIENT_CREATED",
             savedClient.getId(),
             savedClient.getFirstname(),
             savedClient.getLastname(),
@@ -47,8 +46,10 @@ public class ClientService {
             savedClient.getCountry(),
             savedClient.getPhone()
         );
+        clientEventProducer.publishClientEvent(event);
         
-        clientEventProducer.publishClientEvent(clientEvent);
+        System.out.println("Client saved: " + savedClient.getFirstname() + " " + savedClient.getLastname());
+        
         return savedClient;
     }
 
@@ -58,9 +59,9 @@ public class ClientService {
             Client client = clientOpt.get();
             clientRepository.deleteById(id);
             
-            // Create and publish delete event
-            ClientEvent clientEvent = new ClientEvent(
-                "DELETED",
+            // Publish Kafka event
+            ClientEvent event = new ClientEvent(
+                "CLIENT_DELETED",
                 client.getId(),
                 client.getFirstname(),
                 client.getLastname(),
@@ -70,8 +71,9 @@ public class ClientService {
                 client.getCountry(),
                 client.getPhone()
             );
+            clientEventProducer.publishClientEvent(event);
             
-            clientEventProducer.publishClientEvent(clientEvent);
+            System.out.println("Client deleted: " + client.getFirstname() + " " + client.getLastname());
         }
     }
 
