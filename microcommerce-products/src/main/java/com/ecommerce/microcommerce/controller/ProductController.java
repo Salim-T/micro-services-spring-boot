@@ -8,6 +8,7 @@ import com.ecommerce.microcommerce.service.ProductService;
 import com.ecommerce.microcommerce.model.Product;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api")
@@ -24,18 +25,20 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/product/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable int id) {
         Optional<Product> product = productService.getProductById(id);
         return product.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/products")
     public Product createProduct(@RequestBody Product product) {
         return productService.saveProduct(product);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/products/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable int id, @RequestBody Product productDetails) {
         if (!productService.existsById(id)) {
@@ -45,6 +48,7 @@ public class ProductController {
         return ResponseEntity.ok(updatedProduct);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/products/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable int id) {
         if (!productService.existsById(id)) {
