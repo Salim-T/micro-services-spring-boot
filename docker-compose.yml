@@ -9,6 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - clients_data:/var/lib/postgresql/data
+      - ./microcommerce-clients/docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
       - "${CLIENTS_DB_PORT}:5432"
     healthcheck:
@@ -27,6 +28,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - orders_data:/var/lib/postgresql/data
+      - ./microcommerce-orders/docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
       - "${ORDERS_DB_PORT}:5432"
     healthcheck:
@@ -45,6 +47,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - products_data:/var/lib/postgresql/data
+      - ./microcommerce-products/docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
       - "${PRODUCTS_DB_PORT}:5432"
     healthcheck:

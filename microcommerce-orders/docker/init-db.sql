@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS orders (
     description TEXT,
     total DECIMAL(10, 2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Insertion des données d'exemple
@@ -32,4 +32,4 @@ CREATE TRIGGER update_orders_updated_at
     EXECUTE FUNCTION update_updated_at_column();         
 -- Vérification des données insérées
 SELECT 'Database initialized successfully!' as status;
-SELECT COUNT(*) as total_orders FROM orders;   
+SELECT COUNT(*) as total_orders FROM orders;

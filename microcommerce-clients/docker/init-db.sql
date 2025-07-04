@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS clients (
 INSERT INTO clients (name, email, address, city, country, phone) VALUES
 ('Alice Dupont', 'alice.dupont@example.com', '123 Rue de Paris', 'Paris', 'France', '0123456789'),
 ('Bob Martin', 'bob.martin@example.com', '456 Avenue des Champs-Élysées', 'Paris', 'France', '9876543210'),
-('Charlie Brown', 'charlie.brown@example.com', '789 Boulevard Saint-Germain', 'Paris', 'France', '0147258369');
+('Charlie Brown', 'charlie.brown@example.com', '789 Boulevard Saint-Germain', 'Paris', 'France', '0147258369')
 ON CONFLICT (email) DO NOTHING;
 
 -- Fonction pour mettre à jour automatiquement updated_at
