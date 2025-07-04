@@ -1,9 +1,11 @@
 package com.ecommerce.microcommerce.controller;
 
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.ecommerce.microcommerce.dto.CreateOrderRequest;
 import com.ecommerce.microcommerce.service.OrderService;
 import com.ecommerce.microcommerce.model.Order;
 
@@ -33,8 +35,16 @@ public class OrderController {
     }
 
     @PostMapping("/orders")
-    public Order createOrder(@RequestBody Order order) {
-        return orderService.saveOrder(order);
+    public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest request) {
+        try {
+            Order order = orderService.createOrder(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(order);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error creating order: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal error creating order: " + e.getMessage());
+        }
     }
 
     @PutMapping("/orders/{id}")
@@ -59,5 +69,10 @@ public class OrderController {
     @GetMapping("/orders/search")
     public List<Order> searchOrders(@RequestParam String keyword) {
         return orderService.searchOrders(keyword);
+    }
+
+    @GetMapping("/orders/client/{clientId}")
+    public List<Order> getOrdersByClientId(@PathVariable int clientId) {
+        return orderService.getOrdersByClientId(clientId);
     }
 }
